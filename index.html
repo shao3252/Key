@@ -15,11 +15,25 @@
     </div>
 
     <div class="container">
-        <section id="admin-panel" class="glass-panel neon-border hidden">
-            <h2 class="neon-text">Admin Control: Upload Product</h2>
+        
+        <section id="admin-panel" class="glass-panel neon-border hidden" style="position: relative;">
+            
+            <div id="go-to-dashboard-icon" class="admin-dashboard-icon" title="Access Master Control">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="3" y="3" width="7" height="7"></rect>
+                    <rect x="14" y="3" width="7" height="7"></rect>
+                    <rect x="14" y="14" width="7" height="7"></rect>
+                    <rect x="3" y="14" width="7" height="7"></rect>
+                </svg>
+            </div>
+
+            <h2 class="neon-text">Admin Control: Upload</h2>
             <form id="upload-form">
                 <input type="text" id="product-name" placeholder="Product Name" required>
-                <input type="url" id="product-image" placeholder="Product Image URL" required>
+                
+                <label class="neon-text-sub" style="font-size: 0.8rem; margin-bottom: 5px; display: block; margin-top: 10px;">Select Product Image (Gallery)</label>
+                <input type="file" id="product-image" accept="image/*" required>
+                
                 <textarea id="product-desc" placeholder="Product Description" rows="4" required></textarea>
                 
                 <h3 class="neon-text-sub">Payment Instructions</h3>
@@ -36,6 +50,31 @@
             <div id="generated-link-container" class="hidden">
                 <p>Share this secure link with your buyer:</p>
                 <a href="#" id="shareable-link" class="neon-text-sub" target="_blank"></a>
+            </div>
+        </section>
+
+        <section id="login-panel" class="glass-panel neon-border hidden" style="max-width: 400px; margin: 0 auto;">
+            <h2 class="neon-text">Restricted Access</h2>
+            <p class="neon-text-sub" style="text-align: center; font-size: 0.9rem;">Master Authentication Required</p>
+            <form id="admin-login-form">
+                <input type="email" id="admin-email" placeholder="Admin Email" required>
+                <input type="password" id="admin-password" placeholder="Master Password" required>
+                <button type="submit" class="neon-btn" id="login-btn">Authenticate</button>
+                <button type="button" id="back-to-upload-from-login" class="neon-btn" style="border-color: #555; color: #aaa; margin-top: 15px; box-shadow: none;">Cancel</button>
+            </form>
+        </section>
+
+        <section id="dashboard-panel" class="glass-panel neon-border hidden">
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+                <h2 class="neon-text" style="margin-bottom: 0;">Master Control</h2>
+                <div style="display: flex; gap: 10px;">
+                    <button id="back-to-upload-btn" class="neon-btn" style="width: auto; margin: 0; padding: 10px 15px; font-size: 12px; border-color: var(--neon-cyan); color: var(--neon-cyan); box-shadow: none;">+ New Link</button>
+                    <button id="logout-btn" class="neon-btn" style="width: auto; margin: 0; padding: 10px 15px; font-size: 12px; border-color: var(--neon-magenta); color: var(--neon-magenta); box-shadow: none;">Lock System</button>
+                </div>
+            </div>
+            
+            <div id="admin-list" class="admin-table-container">
+                <p class="neon-text-sub">Decrypting database records...</p>
             </div>
         </section>
 
@@ -63,6 +102,7 @@
                 <a href="#" id="display-secret-link" class="neon-btn success-btn" target="_blank">Access Your Product</a>
             </div>
         </section>
+
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
