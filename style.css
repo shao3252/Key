@@ -21,7 +21,7 @@ body {
 
 .container {
     width: 100%;
-    max-width: 600px;
+    max-width: 800px;
     padding: 20px;
 }
 
@@ -31,6 +31,7 @@ body {
     -webkit-backdrop-filter: blur(12px);
     padding: 40px;
     border-radius: 16px;
+    transition: all 0.3s ease;
 }
 
 .neon-border {
@@ -71,7 +72,7 @@ body {
     text-align: center;
 }
 
-input, textarea {
+input[type="text"], input[type="url"], input[type="number"], input[type="email"], input[type="password"], textarea {
     width: 100%;
     padding: 14px;
     margin: 10px 0;
@@ -88,6 +89,38 @@ input, textarea {
 input:focus, textarea:focus {
     border-color: var(--neon-cyan);
     box-shadow: 0 0 12px rgba(0, 243, 255, 0.5);
+}
+
+/* --- FILE INPUT STYLING --- */
+input[type="file"] {
+    width: 100%;
+    padding: 10px;
+    margin: 10px 0;
+    background: rgba(0, 243, 255, 0.05);
+    border: 1px dashed var(--neon-cyan);
+    color: white;
+    border-radius: 8px;
+    cursor: pointer;
+    box-sizing: border-box;
+}
+
+input[type="file"]::file-selector-button {
+    background: transparent;
+    color: var(--neon-cyan);
+    border: 1px solid var(--neon-cyan);
+    padding: 8px 15px;
+    border-radius: 4px;
+    font-weight: bold;
+    margin-right: 15px;
+    cursor: pointer;
+    transition: 0.3s;
+    text-transform: uppercase;
+}
+
+input[type="file"]::file-selector-button:hover {
+    background: var(--neon-cyan);
+    color: var(--bg-color);
+    box-shadow: 0 0 15px var(--neon-cyan);
 }
 
 .neon-btn {
@@ -144,6 +177,7 @@ img {
     border: 1px solid #333;
     margin: 15px 0;
     box-shadow: 0 10px 20px rgba(0,0,0,0.5);
+    object-fit: cover;
 }
 
 .desc-text {
@@ -158,7 +192,7 @@ img {
     padding-bottom: 8px;
 }
 
-/* --- SECRET ADMIN FOG STYLES --- */
+/* --- SECRET FOG STYLES --- */
 .neon-fog {
     position: fixed;
     top: 0;
@@ -200,7 +234,26 @@ img {
     to { opacity: 1; text-shadow: 0 0 30px var(--neon-magenta), 0 0 50px var(--neon-magenta); }
 }
 
-/* --- ADMIN TABLE STYLES --- */
+/* --- DASHBOARD ICON & TABLE STYLES --- */
+.admin-dashboard-icon {
+    position: absolute;
+    top: 25px;
+    right: 25px;
+    width: 28px;
+    height: 28px;
+    color: var(--neon-cyan);
+    transition: all 0.3s ease;
+    filter: drop-shadow(0 0 8px var(--neon-cyan));
+    cursor: pointer;
+    z-index: 10;
+}
+
+.admin-dashboard-icon:hover {
+    color: var(--neon-magenta);
+    filter: drop-shadow(0 0 15px var(--neon-magenta));
+    transform: scale(1.15) rotate(90deg);
+}
+
 .admin-table-container {
     overflow-x: auto;
     margin-top: 20px;
@@ -211,6 +264,7 @@ img {
     border-collapse: collapse;
     color: white;
     text-align: left;
+    min-width: 500px;
 }
 
 .admin-table th {
