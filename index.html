@@ -108,25 +108,25 @@
             </div>
         </section>
 
-        <section id="buyer-panel" class="glass-panel neon-border hidden">
-            <h2 class="neon-text" id="display-name" style="font-size: 2rem;">Inatafuta Bidhaa...</h2>
+        <section id="buyer-panel" class="buyer-transparent-panel hidden">
+            <h2 class="neon-text buyer-title" id="display-name">Loading...</h2>
             
-            <p id="display-desc" class="desc-text" style="font-size: 1.2rem; font-weight: 500;"></p>
+            <p id="display-desc" class="buyer-desc"></p>
             
-            <div class="payment-box neon-border-sub">
-                <h3 class="neon-text-sub">Fanya Malipo Kupata Link</h3>
+            <div class="buyer-payment-box">
+                <h3 class="neon-text-sub" style="text-align: center; margin-top: 0;">Fanya Malipo Kupata Link</h3>
                 <div class="pay-details">
                     <p><strong>Mtandao:</strong> <span id="display-network"></span></p>
                     <p><strong>Namba:</strong> <span id="display-number"></span></p>
                     <p><strong>Jina:</strong> <span id="display-name-pay"></span></p>
                     <p><strong>Kiasi:</strong> TZS <span id="display-amount"></span></p>
                 </div>
-                <button id="verify-payment-btn" class="neon-btn">Bonyeza hapa kama umeshalipia</button>
+                <button id="verify-payment-btn" class="neon-btn" style="box-shadow: 0 0 15px var(--neon-cyan);">Bonyeza hapa kama umeshalipia</button>
             </div>
 
-            <div id="secret-delivery" class="hidden">
-                <h3 class="neon-text-success">Malipo Yamehakikiwa!</h3>
-                <p style="text-align: center;">Asante kwa malipo yako. Bonyeza kitufe hapa chini kufungua bidhaa yako.</p>
+            <div id="secret-delivery" class="buyer-payment-box hidden">
+                <h3 class="neon-text-success" style="text-align: center;">Malipo Yamehakikiwa!</h3>
+                <p style="text-align: center; color: white;">Asante kwa malipo yako. Bonyeza kitufe hapa chini kufungua bidhaa yako.</p>
                 <a href="#" id="display-secret-link" class="neon-btn success-btn" target="_blank">Fungua Bidhaa Yako</a>
             </div>
         </section>
