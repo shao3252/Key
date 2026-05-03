@@ -1,10 +1,10 @@
 document.addEventListener('DOMContentLoaded', async () => {
-    // 1. Initialize Supabase Connection
+    // Initialize Supabase
     const supabaseUrl = 'https://mduvgxdbefqbahlfphfw.supabase.co';
     const supabaseKey = 'sb_publishable_uwIP8jILU7OvcVo7D2MN4A_OZiIhH2s';
     const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
 
-    // 2. DOM Elements Mapping
+    // DOM Elements
     const adminLock = document.getElementById('admin-lock');
     const adminPanel = document.getElementById('admin-panel');
     const buyerPanel = document.getElementById('buyer-panel');
@@ -18,22 +18,15 @@ document.addEventListener('DOMContentLoaded', async () => {
     const logoutBtn = document.getElementById('logout-btn');
     const adminList = document.getElementById('admin-list');
     
-    // Stats Elements
+    // Stats
     const statTotal = document.getElementById('stat-total');
     const statPending = document.getElementById('stat-pending');
     const statVerified = document.getElementById('stat-verified');
 
-    // Secure Master Variables
     let secretClicks = 0;
-    
-    /* PREMIUM CONFIGURATION:
-       Set your 4-digit Master PIN here. 
-       This acts as a rapid-access UI lock to emulate the SaaS platform you observed.
-    */
     const MASTER_PIN = "2026"; 
     let currentPinEntry = "";
 
-    // --- CORE ROUTING ENGINE ---
     const urlParams = new URLSearchParams(window.location.search);
     const productId = urlParams.get('id');
 
@@ -54,7 +47,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         adminLock.classList.remove('hidden');
     }
 
-    // --- THE 7-TAP SECRET LOCK ---
+    // --- SECRET 7-TAP LOCK ---
     if (adminLock) {
         adminLock.addEventListener('click', () => {
             secretClicks++;
@@ -66,7 +59,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     }
 
-    // --- ADMIN SYSTEM NAVIGATION ---
+    // --- NAVIGATION ---
     if (dashboardIcon) {
         dashboardIcon.addEventListener('click', () => {
             hideAllPanels();
@@ -97,7 +90,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     }
 
-    // --- NEON PIN PAD LOGIC ---
+    // --- PIN PAD LOGIC ---
     const pinButtons = document.querySelectorAll('.pin-btn:not(#pin-clear):not(#back-to-upload-from-login)');
     const pinClearBtn = document.getElementById('pin-clear');
     const pinDots = document.querySelectorAll('.pin-dot');
@@ -107,27 +100,19 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (currentPinEntry.length < 4) {
                 currentPinEntry += btn.innerText;
                 updatePinDisplay();
-                
-                if (currentPinEntry.length === 4) {
-                    verifyPin();
-                }
+                if (currentPinEntry.length === 4) verifyPin();
             }
         });
     });
 
     if (pinClearBtn) {
-        pinClearBtn.addEventListener('click', () => {
-            resetPinPad();
-        });
+        pinClearBtn.addEventListener('click', () => resetPinPad());
     }
 
     function updatePinDisplay() {
         pinDots.forEach((dot, index) => {
-            if (index < currentPinEntry.length) {
-                dot.classList.add('filled');
-            } else {
-                dot.classList.remove('filled', 'error');
-            }
+            if (index < currentPinEntry.length) dot.classList.add('filled');
+            else dot.classList.remove('filled', 'error');
         });
     }
 
@@ -138,7 +123,6 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     function verifyPin() {
         if (currentPinEntry === MASTER_PIN) {
-            // Success: Unlock Dashboard
             setTimeout(() => {
                 hideAllPanels();
                 dashboardPanel.classList.remove('hidden');
@@ -146,15 +130,12 @@ document.addEventListener('DOMContentLoaded', async () => {
                 resetPinPad();
             }, 300);
         } else {
-            // Error: Flash Red and Reset
             pinDots.forEach(dot => dot.classList.add('error'));
-            setTimeout(() => {
-                resetPinPad();
-            }, 600);
+            setTimeout(() => resetPinPad(), 600);
         }
     }
 
-    // --- REAL IMAGE UPLOAD & ENCRYPTION ENGINE ---
+    // --- UPLOAD LOGIC ---
     const uploadForm = document.getElementById('upload-form');
     if (uploadForm) {
         uploadForm.addEventListener('submit', async (e) => {
@@ -163,7 +144,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             const imageFile = document.getElementById('product-image').files[0];
             
             if (!imageFile) {
-                alert("Please select a product image from your gallery.");
+                alert("Please select an image.");
                 return;
             }
 
@@ -174,20 +155,13 @@ document.addEventListener('DOMContentLoaded', async () => {
                 const fileExt = imageFile.name.split('.').pop();
                 const fileName = `premium_${Date.now()}_${Math.random().toString(36).substring(7)}.${fileExt}`;
                 
-                const { error: uploadError } = await supabase.storage
-                    .from('product-images')
-                    .upload(fileName, imageFile);
-
+                const { error: uploadError } = await supabase.storage.from('product-images').upload(fileName, imageFile);
                 if (uploadError) throw uploadError;
 
-                const { data: publicUrlData } = supabase.storage
-                    .from('product-images')
-                    .getPublicUrl(fileName);
-
+                const { data: publicUrlData } = supabase.storage.from('product-images').getPublicUrl(fileName);
                 const finalImageUrl = publicUrlData.publicUrl;
 
                 submitBtn.innerText = "Encrypting Data...";
-                
                 const productData = {
                     name: document.getElementById('product-name').value,
                     image_url: finalImageUrl,
@@ -201,7 +175,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                 };
 
                 const { data, error: dbError } = await supabase.from('products').insert([productData]).select();
-
                 if (dbError) throw dbError;
 
                 const newId = data[0].id;
@@ -217,34 +190,28 @@ document.addEventListener('DOMContentLoaded', async () => {
                 submitBtn.classList.add('success-btn');
 
             } catch (error) {
-                alert(`Upload Process Failed: ${error.message}`);
+                alert(`Upload Failed: ${error.message}`);
                 submitBtn.innerText = "Encrypt & Generate Link";
                 submitBtn.disabled = false;
             }
         });
     }
 
-    // --- DASHBOARD: DYNAMIC STATS & APPROVAL LOGIC ---
+    // --- DASHBOARD LOGIC ---
     async function fetchRequests() {
-        const { data, error } = await supabase
-            .from('products')
-            .select('*')
-            .order('created_at', { ascending: false });
+        const { data, error } = await supabase.from('products').select('*').order('created_at', { ascending: false });
 
         if (error) {
-            adminList.innerHTML = `<p class="neon-text-sub">Error Fetching Data: ${error.message}</p>`;
+            adminList.innerHTML = `<p class="neon-text-sub">Error: ${error.message}</p>`;
             return;
         }
 
         if (data.length === 0) {
-            adminList.innerHTML = `<p>No secure records found in the database.</p>`;
-            statTotal.innerText = "0";
-            statPending.innerText = "0";
-            statVerified.innerText = "0";
+            adminList.innerHTML = `<p>No records found.</p>`;
+            statTotal.innerText = "0"; statPending.innerText = "0"; statVerified.innerText = "0";
             return;
         }
 
-        // Calculate Dashboard Analytics
         statTotal.innerText = data.length;
         statPending.innerText = data.filter(item => !item.is_paid).length;
         statVerified.innerText = data.filter(item => item.is_paid).length;
@@ -258,8 +225,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                 '<span style="color: var(--neon-magenta); font-weight: bold;">PENDING</span>';
             
             const actionBtn = item.is_paid ? 
-                '<span style="color: #555;">Locked (Waiting for User)</span>' : 
-                `<button onclick="approvePayment('${item.id}')" class="neon-btn" style="padding: 8px 12px; margin: 0; font-size: 12px; border-color: var(--neon-green); color: var(--neon-green); box-shadow: none;">Approve</button>`;
+                '<span style="color: #555;">Locked</span>' : 
+                `<button onclick="approvePayment('${item.id}')" class="neon-btn" style="padding: 8px 12px; margin: 0; font-size: 12px; box-shadow: none;">Approve</button>`;
 
             html += `<tr><td>${item.name}</td><td>TZS ${item.amount}</td><td>${statusText}</td><td>${actionBtn}</td></tr>`;
         });
@@ -267,17 +234,13 @@ document.addEventListener('DOMContentLoaded', async () => {
         adminList.innerHTML = html;
     }
 
-    // Global Authorization function
     window.approvePayment = async (id) => {
         const { error } = await supabase.from('products').update({ is_paid: true }).eq('id', id);
-        if (error) {
-            alert(`Database Error: ${error.message}`);
-        } else {
-            fetchRequests(); // Refresh the table and stats dynamically
-        }
+        if (error) alert(`Error: ${error.message}`);
+        else fetchRequests(); 
     };
 
-    // --- BUYER VIEW LOGIC (SWAHILI + DYNAMIC BACKGROUND) ---
+    // --- BUYER VIEW LOGIC ---
     async function loadBuyerData(id) {
         const { data, error } = await supabase.from('products').select('*').eq('id', id).single();
 
@@ -286,9 +249,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             return;
         }
 
-        if (bgLayer) {
-            bgLayer.style.backgroundImage = `url('${data.image_url}')`;
-        }
+        if (bgLayer) bgLayer.style.backgroundImage = `url('${data.image_url}')`;
 
         document.getElementById('display-name').innerText = data.name;
         document.getElementById('display-desc').innerText = data.description;
@@ -311,12 +272,10 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             if (data && data.is_paid) {
                 unlockProduct(data.secret_link);
-
-                // Premium Security: Instantly lock the database entry after delivery
+                // Auto-lock the database entry instantly
                 await supabase.from('products').update({ is_paid: false }).eq('id', productId);
-
             } else {
-                alert("Muamala bado unasubiri. Admin bado hajahakiki malipo haya. Tafadhali hakikisha umetuma pesa kisha jaribu tena baada ya muda mfupi.");
+                alert("Muamala bado unasubiri. Admin bado hajahakiki malipo haya.");
                 verifyBtn.innerText = "Bonyeza hapa kama umeshalipia";
                 verifyBtn.disabled = false;
             }
@@ -324,7 +283,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     function unlockProduct(link) {
-        document.querySelector('.payment-box').classList.add('hidden');
+        document.querySelector('.buyer-payment-box').classList.add('hidden');
         const secretDelivery = document.getElementById('secret-delivery');
         secretDelivery.classList.remove('hidden');
         document.getElementById('display-secret-link').href = link;
