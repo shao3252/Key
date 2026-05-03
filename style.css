@@ -158,3 +158,68 @@ img {
     padding-bottom: 8px;
 }
 
+/* --- SECRET ADMIN FOG STYLES --- */
+.neon-fog {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: radial-gradient(circle, rgba(10, 10, 12, 0.8) 0%, #0a0a0c 100%);
+    backdrop-filter: blur(40px);
+    -webkit-backdrop-filter: blur(40px);
+    z-index: 9999;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: default;
+    user-select: none;
+}
+
+.fog-content {
+    text-align: center;
+}
+
+.glitch-text {
+    font-size: 5rem;
+    color: var(--neon-magenta);
+    text-shadow: 0 0 20px var(--neon-magenta);
+    margin: 0;
+    animation: neonPulse 2s infinite alternate;
+}
+
+.neon-fog p {
+    color: var(--neon-cyan);
+    letter-spacing: 5px;
+    font-weight: bold;
+    opacity: 0.6;
+}
+
+@keyframes neonPulse {
+    from { opacity: 0.5; text-shadow: 0 0 10px var(--neon-magenta); }
+    to { opacity: 1; text-shadow: 0 0 30px var(--neon-magenta), 0 0 50px var(--neon-magenta); }
+}
+
+/* --- ADMIN TABLE STYLES --- */
+.admin-table-container {
+    overflow-x: auto;
+    margin-top: 20px;
+}
+
+.admin-table {
+    width: 100%;
+    border-collapse: collapse;
+    color: white;
+    text-align: left;
+}
+
+.admin-table th {
+    border-bottom: 2px solid var(--neon-cyan);
+    color: var(--neon-cyan);
+    padding: 12px;
+}
+
+.admin-table td {
+    border-bottom: 1px solid #333;
+    padding: 12px;
+}
