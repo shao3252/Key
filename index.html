@@ -1,1 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Neon Digital Market</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <section id="admin-panel" class="glass-panel neon-border">
+            <h2 class="neon-text">Admin Control: Upload Product</h2>
+            <form id="upload-form">
+                <input type="text" id="product-name" placeholder="Product Name" required>
+                <input type="url" id="product-image" placeholder="Product Image URL" required>
+                <textarea id="product-desc" placeholder="Product Description" rows="4" required></textarea>
+                
+                <h3 class="neon-text-sub">Payment Instructions</h3>
+                <input type="text" id="pay-network" placeholder="Network (e.g., M-Pesa, Tigo Pesa)" required>
+                <input type="text" id="pay-number" placeholder="Payment Number" required>
+                <input type="text" id="pay-name" placeholder="Receiver Name" required>
+                <input type="number" id="pay-amount" placeholder="Amount Required" required>
+                
+                <h3 class="neon-text-sub">The Secret Asset</h3>
+                <input type="url" id="product-link" placeholder="Secret Product Link (Hidden until paid)" required>
+                
+                <button type="submit" class="neon-btn">Generate Secure Link</button>
+            </form>
+            <div id="generated-link-container" class="hidden">
+                <p>Share this secure link with your buyer:</p>
+                <a href="#" id="shareable-link" class="neon-text-sub" target="_blank"></a>
+            </div>
+        </section>
+
+        <section id="buyer-panel" class="glass-panel neon-border hidden">
+            <h2 class="neon-text" id="display-name">Loading Product...</h2>
+            <div class="image-wrapper">
+                <img id="display-image" src="" alt="Product Image">
+            </div>
+            <p id="display-desc" class="desc-text"></p>
+            
+            <div class="payment-box neon-border-sub">
+                <h3 class="neon-text-sub">Pay to Unlock Link</h3>
+                <div class="pay-details">
+                    <p><strong>Network:</strong> <span id="display-network"></span></p>
+                    <p><strong>Number:</strong> <span id="display-number"></span></p>
+                    <p><strong>Name:</strong> <span id="display-name-pay"></span></p>
+                    <p><strong>Amount:</strong> <span id="display-amount"></span></p>
+                </div>
+                <button id="verify-payment-btn" class="neon-btn">I Have Paid (Check Verification)</button>
+            </div>
+
+            <div id="secret-delivery" class="hidden">
+                <h3 class="neon-text-success">Payment Verified!</h3>
+                <p>Thank you for your purchase. Click below to access your premium product.</p>
+                <a href="#" id="display-secret-link" class="neon-btn success-btn" target="_blank">Access Your Product</a>
+            </div>
+        </section>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="app.js"></script>
+</body>
+</html>
 
