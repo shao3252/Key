@@ -7,6 +7,8 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
+    <div id="bg-layer"></div>
+
     <div id="admin-lock" class="neon-fog hidden">
         <div class="fog-content">
             <h1 class="glitch-text">404</h1>
@@ -79,27 +81,25 @@
         </section>
 
         <section id="buyer-panel" class="glass-panel neon-border hidden">
-            <h2 class="neon-text" id="display-name">Loading Product...</h2>
-            <div class="image-wrapper">
-                <img id="display-image" src="" alt="Product Image">
-            </div>
-            <p id="display-desc" class="desc-text"></p>
+            <h2 class="neon-text" id="display-name" style="font-size: 2rem;">Inatafuta Bidhaa...</h2>
+            
+            <p id="display-desc" class="desc-text" style="font-size: 1.2rem; font-weight: 500;"></p>
             
             <div class="payment-box neon-border-sub">
-                <h3 class="neon-text-sub">Pay to Unlock Link</h3>
+                <h3 class="neon-text-sub">Fanya Malipo Kupata Link</h3>
                 <div class="pay-details">
-                    <p><strong>Network:</strong> <span id="display-network"></span></p>
-                    <p><strong>Number:</strong> <span id="display-number"></span></p>
-                    <p><strong>Name:</strong> <span id="display-name-pay"></span></p>
-                    <p><strong>Amount:</strong> <span id="display-amount"></span></p>
+                    <p><strong>Mtandao:</strong> <span id="display-network"></span></p>
+                    <p><strong>Namba:</strong> <span id="display-number"></span></p>
+                    <p><strong>Jina:</strong> <span id="display-name-pay"></span></p>
+                    <p><strong>Kiasi:</strong> TZS <span id="display-amount"></span></p>
                 </div>
-                <button id="verify-payment-btn" class="neon-btn">I Have Paid (Check Verification)</button>
+                <button id="verify-payment-btn" class="neon-btn">Bonyeza hapa kama umeshalipia</button>
             </div>
 
             <div id="secret-delivery" class="hidden">
-                <h3 class="neon-text-success">Payment Verified!</h3>
-                <p>Thank you for your purchase. Click below to access your premium product.</p>
-                <a href="#" id="display-secret-link" class="neon-btn success-btn" target="_blank">Access Your Product</a>
+                <h3 class="neon-text-success">Malipo Yamehakikiwa!</h3>
+                <p style="text-align: center;">Asante kwa malipo yako. Bonyeza kitufe hapa chini kufungua bidhaa yako.</p>
+                <a href="#" id="display-secret-link" class="neon-btn success-btn" target="_blank">Fungua Bidhaa Yako</a>
             </div>
         </section>
 
