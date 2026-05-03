@@ -1,5 +1,5 @@
 document.addEventListener('DOMContentLoaded', async () => {
-    // 1. Initialize Supabase
+    // 1. Initialize Premium Supabase Connection
     const supabaseUrl = 'https://mduvgxdbefqbahlfphfw.supabase.co';
     const supabaseKey = 'sb_publishable_uwIP8jILU7OvcVo7D2MN4A_OZiIhH2s';
     const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
@@ -9,22 +9,22 @@ document.addEventListener('DOMContentLoaded', async () => {
     const buyerPanel = document.getElementById('buyer-panel');
     const verifyBtn = document.getElementById('verify-payment-btn');
     
-    // Check URL parameters to see if we are in Buyer Mode
+    // 2. Smart Routing: Detect if URL has an ID for Buyer Mode
     const urlParams = new URLSearchParams(window.location.search);
     const productId = urlParams.get('id');
 
     if (productId) {
-        // Switch to Buyer UI
+        // Enter Buyer Mode
         adminPanel.classList.add('hidden');
         buyerPanel.classList.remove('hidden');
         await loadBuyerData(productId);
     } else {
-        // Keep Admin UI
+        // Enter Admin Mode
         adminPanel.classList.remove('hidden');
         buyerPanel.classList.add('hidden');
     }
 
-    // --- ADMIN: UPLOAD TO DATABASE ---
+    // --- ADMIN SECURE UPLOAD LOGIC ---
     if (uploadForm) {
         uploadForm.addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -45,20 +45,22 @@ document.addEventListener('DOMContentLoaded', async () => {
                 is_paid: false
             };
 
+            // Push to Supabase Database
             const { data, error } = await supabase
                 .from('products')
                 .insert([productData])
                 .select();
 
+            // Advanced Debugging Protocol: Exposes exact database failures
             if (error) {
-                console.error('Error uploading:', error);
-                alert('Upload failed. Ensure your Supabase table is created correctly.');
+                console.error('Database Error:', error);
+                alert(`SUPABASE ERROR:\nMessage: ${error.message || 'Unknown Error'}\nDetails: ${error.details || 'None'}\nHint: ${error.hint || 'Check your database RLS policies.'}`);
                 submitBtn.innerText = "Generate Secure Link";
                 submitBtn.disabled = false;
                 return;
             }
 
-            // Generate Buyer Link
+            // Success: Generate Unique Buyer Link
             const newId = data[0].id;
             const linkContainer = document.getElementById('generated-link-container');
             const shareableLink = document.getElementById('shareable-link');
@@ -70,11 +72,15 @@ document.addEventListener('DOMContentLoaded', async () => {
             shareableLink.innerText = finalLink;
             linkContainer.classList.remove('hidden');
             
+            // Visual feedback on success
             submitBtn.innerText = "Successfully Uploaded!";
+            submitBtn.style.color = "var(--neon-green)";
+            submitBtn.style.borderColor = "var(--neon-green)";
+            submitBtn.style.boxShadow = "0 0 15px var(--neon-green) inset, 0 0 15px var(--neon-green)";
         });
     }
 
-    // --- BUYER: FETCH DATA ---
+    // --- BUYER DATA FETCH LOGIC ---
     async function loadBuyerData(id) {
         const { data, error } = await supabase
             .from('products')
@@ -83,10 +89,11 @@ document.addEventListener('DOMContentLoaded', async () => {
             .single();
 
         if (error || !data) {
-            document.getElementById('display-name').innerText = "Product Not Found or Invalid Link";
+            document.getElementById('display-name').innerText = "Product Not Found or Link Expired";
             return;
         }
 
+        // Render Data to Premium UI
         document.getElementById('display-name').innerText = data.name;
         document.getElementById('display-image').src = data.image_url;
         document.getElementById('display-desc').innerText = data.description;
@@ -95,18 +102,21 @@ document.addEventListener('DOMContentLoaded', async () => {
         document.getElementById('display-name-pay').innerText = data.pay_name;
         document.getElementById('display-amount').innerText = data.amount;
 
-        // If admin already verified payment, unlock immediately
+        // Auto-Unlock if already verified by Admin
         if (data.is_paid) {
             unlockProduct(data.secret_link);
         }
     }
 
-    // --- BUYER: VERIFY PAYMENT BUTTON ---
+    // --- PAYMENT VERIFICATION LOGIC ---
     if (verifyBtn) {
         verifyBtn.addEventListener('click', async () => {
-            verifyBtn.innerText = "Checking Database Status...";
+            // Visual loading state
+            verifyBtn.innerText = "Querying Database...";
             verifyBtn.style.borderColor = "var(--neon-magenta)";
             verifyBtn.style.color = "var(--neon-magenta)";
+            verifyBtn.style.boxShadow = "0 0 15px var(--neon-magenta) inset, 0 0 15px var(--neon-magenta)";
+            verifyBtn.disabled = true;
             
             const { data, error } = await supabase
                 .from('products')
@@ -117,12 +127,19 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (data && data.is_paid) {
                 unlockProduct(data.secret_link);
             } else {
-                alert("Payment not verified yet. Please wait for the Admin to confirm the transaction.");
+                alert("Transaction pending. The Admin has not verified this payment yet. Please ensure you have sent the funds and try again shortly.");
+                
+                // Reset button state
                 verifyBtn.innerText = "Check Verification Again";
+                verifyBtn.disabled = false;
+                verifyBtn.style.borderColor = "var(--neon-cyan)";
+                verifyBtn.style.color = "var(--neon-cyan)";
+                verifyBtn.style.boxShadow = "0 0 10px var(--neon-cyan) inset, 0 0 10px var(--neon-cyan)";
             }
         });
     }
 
+    // --- ASSET DELIVERY LOGIC ---
     function unlockProduct(link) {
         document.querySelector('.payment-box').classList.add('hidden');
         const secretDelivery = document.getElementById('secret-delivery');
@@ -132,4 +149,3 @@ document.addEventListener('DOMContentLoaded', async () => {
         secretLinkDisplay.href = link;
     }
 });
-
