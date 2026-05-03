@@ -7,8 +7,15 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
+    <div id="admin-lock" class="neon-fog hidden">
+        <div class="fog-content">
+            <h1 class="glitch-text">404</h1>
+            <p>SYSTEM ENCRYPTED. ACCESS DENIED.</p>
+        </div>
+    </div>
+
     <div class="container">
-        <section id="admin-panel" class="glass-panel neon-border">
+        <section id="admin-panel" class="glass-panel neon-border hidden">
             <h2 class="neon-text">Admin Control: Upload Product</h2>
             <form id="upload-form">
                 <input type="text" id="product-name" placeholder="Product Name" required>
@@ -24,7 +31,7 @@
                 <h3 class="neon-text-sub">The Secret Asset</h3>
                 <input type="url" id="product-link" placeholder="Secret Product Link (Hidden until paid)" required>
                 
-                <button type="submit" class="neon-btn">Generate Secure Link</button>
+                <button type="submit" class="neon-btn">Encrypt & Generate Link</button>
             </form>
             <div id="generated-link-container" class="hidden">
                 <p>Share this secure link with your buyer:</p>
@@ -62,4 +69,3 @@
     <script src="app.js"></script>
 </body>
 </html>
-
