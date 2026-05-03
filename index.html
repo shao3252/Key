@@ -18,7 +18,7 @@
 
     <div class="container">
         
-        <section id="admin-panel" class="glass-panel neon-border hidden" style="position: relative;">
+        <section id="admin-panel" class="glass-panel neon-border hidden" style="position: relative; max-width: 800px;">
             
             <div id="go-to-dashboard-icon" class="admin-dashboard-icon" title="Access Master Control">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -29,49 +29,77 @@
                 </svg>
             </div>
 
-            <h2 class="neon-text">Admin Control: Upload</h2>
+            <h2 class="neon-text">System Core: Generate Link</h2>
+            
             <form id="upload-form">
-                <input type="text" id="product-name" placeholder="Product Name" required>
-                
-                <label class="neon-text-sub" style="font-size: 0.8rem; margin-bottom: 5px; display: block; margin-top: 10px;">Select Product Image (Gallery)</label>
-                <input type="file" id="product-image" accept="image/*" required>
-                
-                <textarea id="product-desc" placeholder="Product Description" rows="4" required></textarea>
-                
-                <h3 class="neon-text-sub">Payment Instructions</h3>
-                <input type="text" id="pay-network" placeholder="Network (e.g., M-Pesa, Tigo Pesa)" required>
-                <input type="text" id="pay-number" placeholder="Payment Number" required>
-                <input type="text" id="pay-name" placeholder="Receiver Name" required>
-                <input type="number" id="pay-amount" placeholder="Amount Required" required>
-                
-                <h3 class="neon-text-sub">The Secret Asset</h3>
-                <input type="url" id="product-link" placeholder="Secret Product Link (Hidden until paid)" required>
+                <div class="form-grid">
+                    <div class="form-section neon-border-sub">
+                        <h3 class="neon-text-sub" style="margin-top: 0;">1. Media & Details</h3>
+                        <input type="text" id="product-name" placeholder="Product Name" required>
+                        <label class="neon-text-sub" style="font-size: 0.8rem; margin-bottom: 5px; display: block; margin-top: 10px;">Upload Gallery Image</label>
+                        <input type="file" id="product-image" accept="image/*" required>
+                        <textarea id="product-desc" placeholder="Product Description" rows="4" required></textarea>
+                    </div>
+
+                    <div class="form-section neon-border-sub">
+                        <h3 class="neon-text-sub" style="margin-top: 0;">2. Payment Routing</h3>
+                        <input type="text" id="pay-network" placeholder="Network (e.g., M-Pesa)" required>
+                        <input type="text" id="pay-number" placeholder="Payment Number" required>
+                        <input type="text" id="pay-name" placeholder="Receiver Name" required>
+                        <input type="number" id="pay-amount" placeholder="Amount (TZS)" required>
+                        
+                        <h3 class="neon-text-sub">3. The Secret Asset</h3>
+                        <input type="url" id="product-link" placeholder="Hidden URL (Delivered after payment)" required>
+                    </div>
+                </div>
                 
                 <button type="submit" class="neon-btn">Encrypt & Generate Link</button>
             </form>
             <div id="generated-link-container" class="hidden">
-                <p>Share this secure link with your buyer:</p>
-                <a href="#" id="shareable-link" class="neon-text-sub" target="_blank"></a>
+                <p style="text-align: center;">Share this secure single-use link with your buyer:</p>
+                <a href="#" id="shareable-link" class="neon-text-sub" style="text-align: center; font-size: 1.3rem;" target="_blank"></a>
             </div>
         </section>
 
-        <section id="login-panel" class="glass-panel neon-border hidden" style="max-width: 400px; margin: 0 auto;">
-            <h2 class="neon-text">Restricted Access</h2>
-            <p class="neon-text-sub" style="text-align: center; font-size: 0.9rem;">Master Authentication Required</p>
-            <form id="admin-login-form">
-                <input type="email" id="admin-email" placeholder="Admin Email" required>
-                <input type="password" id="admin-password" placeholder="Master Password" required>
-                <button type="submit" class="neon-btn" id="login-btn">Authenticate</button>
-                <button type="button" id="back-to-upload-from-login" class="neon-btn" style="border-color: #555; color: #aaa; margin-top: 15px; box-shadow: none;">Cancel</button>
-            </form>
+        <section id="login-panel" class="glass-panel neon-border hidden" style="max-width: 350px; margin: 0 auto;">
+            <h2 class="neon-text">Restricted Area</h2>
+            <p class="neon-text-sub" style="text-align: center; font-size: 0.9rem; margin-bottom: 20px;">Enter Master PIN</p>
+            
+            <div class="pin-display" id="pin-display">
+                <div class="pin-dot"></div><div class="pin-dot"></div><div class="pin-dot"></div><div class="pin-dot"></div>
+            </div>
+
+            <div class="pin-grid">
+                <button class="pin-btn">1</button><button class="pin-btn">2</button><button class="pin-btn">3</button>
+                <button class="pin-btn">4</button><button class="pin-btn">5</button><button class="pin-btn">6</button>
+                <button class="pin-btn">7</button><button class="pin-btn">8</button><button class="pin-btn">9</button>
+                <button class="pin-btn" id="pin-clear" style="color: var(--neon-magenta);">C</button>
+                <button class="pin-btn">0</button>
+                <button class="pin-btn" id="back-to-upload-from-login" style="color: var(--neon-cyan);">&larr;</button>
+            </div>
         </section>
 
-        <section id="dashboard-panel" class="glass-panel neon-border hidden">
-            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+        <section id="dashboard-panel" class="glass-panel neon-border hidden" style="max-width: 900px; margin: 0 auto;">
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 20px;">
                 <h2 class="neon-text" style="margin-bottom: 0;">Master Control</h2>
                 <div style="display: flex; gap: 10px;">
                     <button id="back-to-upload-btn" class="neon-btn" style="width: auto; margin: 0; padding: 10px 15px; font-size: 12px; border-color: var(--neon-cyan); color: var(--neon-cyan); box-shadow: none;">+ New Link</button>
                     <button id="logout-btn" class="neon-btn" style="width: auto; margin: 0; padding: 10px 15px; font-size: 12px; border-color: var(--neon-magenta); color: var(--neon-magenta); box-shadow: none;">Lock System</button>
+                </div>
+            </div>
+            
+            <div class="stats-grid">
+                <div class="stat-box">
+                    <h4>Total Links</h4>
+                    <span id="stat-total" class="neon-text">0</span>
+                </div>
+                <div class="stat-box">
+                    <h4>Pending</h4>
+                    <span id="stat-pending" style="color: var(--neon-magenta); text-shadow: 0 0 10px var(--neon-magenta);">0</span>
+                </div>
+                <div class="stat-box">
+                    <h4>Verified</h4>
+                    <span id="stat-verified" style="color: var(--neon-green); text-shadow: 0 0 10px var(--neon-green);">0</span>
                 </div>
             </div>
             
