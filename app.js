@@ -10,6 +10,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const buyerPanel = document.getElementById('buyer-panel');
     const loginPanel = document.getElementById('login-panel');
     const dashboardPanel = document.getElementById('dashboard-panel');
+    const bgLayer = document.getElementById('bg-layer');
     
     const dashboardIcon = document.getElementById('go-to-dashboard-icon');
     const backToUploadBtn = document.getElementById('back-to-upload-btn');
@@ -134,7 +135,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             submitBtn.disabled = true;
 
             try {
-                // 1. Generate unique file name and upload to Supabase Storage
                 const fileExt = imageFile.name.split('.').pop();
                 const fileName = `${Date.now()}_${Math.random().toString(36).substring(7)}.${fileExt}`;
                 
@@ -144,14 +144,12 @@ document.addEventListener('DOMContentLoaded', async () => {
 
                 if (uploadError) throw uploadError;
 
-                // 2. Retrieve the public URL for the newly uploaded image
                 const { data: publicUrlData } = supabase.storage
                     .from('product-images')
                     .getPublicUrl(fileName);
 
                 const finalImageUrl = publicUrlData.publicUrl;
 
-                // 3. Insert all data (including the new image URL) into the Database
                 submitBtn.innerText = "Encrypting Data...";
                 
                 const productData = {
@@ -170,7 +168,6 @@ document.addEventListener('DOMContentLoaded', async () => {
 
                 if (dbError) throw dbError;
 
-                // 4. Success UI Update
                 const newId = data[0].id;
                 const currentUrl = window.location.origin + window.location.pathname;
                 const finalLink = `${currentUrl}?id=${newId}`;
@@ -235,17 +232,19 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     };
 
-    // --- BUYER VIEW LOGIC ---
+    // --- BUYER VIEW LOGIC (SWAHILI TRANSLATED & BACKGROUND INJECTED) ---
     async function loadBuyerData(id) {
         const { data, error } = await supabase.from('products').select('*').eq('id', id).single();
 
         if (error || !data) {
-            document.getElementById('display-name').innerText = "Product Not Found or Encrypted.";
+            document.getElementById('display-name').innerText = "Bidhaa Haipatikani.";
             return;
         }
 
+        // Set the Full Screen Background Image
+        bgLayer.style.backgroundImage = `url('${data.image_url}')`;
+
         document.getElementById('display-name').innerText = data.name;
-        document.getElementById('display-image').src = data.image_url;
         document.getElementById('display-desc').innerText = data.description;
         document.getElementById('display-network').innerText = data.pay_network;
         document.getElementById('display-number').innerText = data.pay_number;
@@ -258,7 +257,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const verifyBtn = document.getElementById('verify-payment-btn');
     if (verifyBtn) {
         verifyBtn.addEventListener('click', async () => {
-            verifyBtn.innerText = "Querying Database...";
+            verifyBtn.innerText = "Inahakiki Database...";
             verifyBtn.disabled = true;
             
             const { data } = await supabase.from('products').select('is_paid, secret_link').eq('id', productId).single();
@@ -266,8 +265,8 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (data && data.is_paid) {
                 unlockProduct(data.secret_link);
             } else {
-                alert("Transaction pending. The Admin has not verified this payment yet.");
-                verifyBtn.innerText = "Check Verification Again";
+                alert("Muamala bado unasubiri. Admin bado hajahakiki malipo haya. Tafadhali hakikisha umetuma pesa kisha jaribu tena baada ya muda mfupi.");
+                verifyBtn.innerText = "Bonyeza hapa kama umeshalipia";
                 verifyBtn.disabled = false;
             }
         });
