@@ -1,5 +1,5 @@
 document.addEventListener('DOMContentLoaded', async () => {
-    // 1. Initialize Premium Supabase Connection
+    // 1. Initialize Supabase Connection
     const supabaseUrl = 'https://mduvgxdbefqbahlfphfw.supabase.co';
     const supabaseKey = 'sb_publishable_uwIP8jILU7OvcVo7D2MN4A_OZiIhH2s';
     const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
@@ -10,16 +10,28 @@ document.addEventListener('DOMContentLoaded', async () => {
     const buyerPanel = document.getElementById('buyer-panel');
     const loginPanel = document.getElementById('login-panel');
     const dashboardPanel = document.getElementById('dashboard-panel');
-    const bgLayer = document.getElementById('bg-layer'); // Dynamic Background
+    const bgLayer = document.getElementById('bg-layer');
     
-    // Navigation & Action Buttons
     const dashboardIcon = document.getElementById('go-to-dashboard-icon');
     const backToUploadBtn = document.getElementById('back-to-upload-btn');
     const backToUploadFromLogin = document.getElementById('back-to-upload-from-login');
     const logoutBtn = document.getElementById('logout-btn');
     const adminList = document.getElementById('admin-list');
     
+    // Stats Elements
+    const statTotal = document.getElementById('stat-total');
+    const statPending = document.getElementById('stat-pending');
+    const statVerified = document.getElementById('stat-verified');
+
+    // Secure Master Variables
     let secretClicks = 0;
+    
+    /* PREMIUM CONFIGURATION:
+       Set your 4-digit Master PIN here. 
+       This acts as a rapid-access UI lock to emulate the SaaS platform you observed.
+    */
+    const MASTER_PIN = "2026"; 
+    let currentPinEntry = "";
 
     // --- CORE ROUTING ENGINE ---
     const urlParams = new URLSearchParams(window.location.search);
@@ -33,7 +45,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         dashboardPanel.classList.add('hidden');
     }
 
-    // Determine initial view based on URL parameters
     if (productId) {
         hideAllPanels();
         buyerPanel.classList.remove('hidden');
@@ -50,23 +61,17 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (secretClicks === 7) {
                 hideAllPanels();
                 adminPanel.classList.remove('hidden');
-                secretClicks = 0; // Reset counter
+                secretClicks = 0; 
             }
         });
     }
 
     // --- ADMIN SYSTEM NAVIGATION ---
     if (dashboardIcon) {
-        dashboardIcon.addEventListener('click', async () => {
+        dashboardIcon.addEventListener('click', () => {
             hideAllPanels();
-            // Verify if a secure session already exists
-            const { data: { session } } = await supabase.auth.getSession();
-            if (session) {
-                dashboardPanel.classList.remove('hidden');
-                fetchRequests();
-            } else {
-                loginPanel.classList.remove('hidden');
-            }
+            loginPanel.classList.remove('hidden');
+            resetPinPad();
         });
     }
 
@@ -84,41 +89,69 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     }
 
-    // --- MASTER AUTHENTICATION (LOGIN/LOGOUT) ---
-    const loginForm = document.getElementById('admin-login-form');
-    if (loginForm) {
-        loginForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const email = document.getElementById('admin-email').value;
-            const password = document.getElementById('admin-password').value;
-            const loginBtn = document.getElementById('login-btn');
+    if (logoutBtn) {
+        logoutBtn.addEventListener('click', () => {
+            hideAllPanels();
+            loginPanel.classList.remove('hidden');
+            resetPinPad();
+        });
+    }
 
-            loginBtn.innerText = "Authenticating...";
-            loginBtn.disabled = true;
+    // --- NEON PIN PAD LOGIC ---
+    const pinButtons = document.querySelectorAll('.pin-btn:not(#pin-clear):not(#back-to-upload-from-login)');
+    const pinClearBtn = document.getElementById('pin-clear');
+    const pinDots = document.querySelectorAll('.pin-dot');
 
-            const { error } = await supabase.auth.signInWithPassword({ email, password });
+    pinButtons.forEach(btn => {
+        btn.addEventListener('click', () => {
+            if (currentPinEntry.length < 4) {
+                currentPinEntry += btn.innerText;
+                updatePinDisplay();
+                
+                if (currentPinEntry.length === 4) {
+                    verifyPin();
+                }
+            }
+        });
+    });
 
-            if (error) {
-                alert(`Authentication Failed: ${error.message}`);
-                loginBtn.innerText = "Authenticate";
-                loginBtn.disabled = false;
+    if (pinClearBtn) {
+        pinClearBtn.addEventListener('click', () => {
+            resetPinPad();
+        });
+    }
+
+    function updatePinDisplay() {
+        pinDots.forEach((dot, index) => {
+            if (index < currentPinEntry.length) {
+                dot.classList.add('filled');
             } else {
-                document.getElementById('admin-password').value = '';
-                loginBtn.innerText = "Authenticate";
-                loginBtn.disabled = false;
-                hideAllPanels();
-                dashboardPanel.classList.remove('hidden');
-                fetchRequests();
+                dot.classList.remove('filled', 'error');
             }
         });
     }
 
-    if (logoutBtn) {
-        logoutBtn.addEventListener('click', async () => {
-            await supabase.auth.signOut();
-            hideAllPanels();
-            loginPanel.classList.remove('hidden');
-        });
+    function resetPinPad() {
+        currentPinEntry = "";
+        pinDots.forEach(dot => dot.classList.remove('filled', 'error'));
+    }
+
+    function verifyPin() {
+        if (currentPinEntry === MASTER_PIN) {
+            // Success: Unlock Dashboard
+            setTimeout(() => {
+                hideAllPanels();
+                dashboardPanel.classList.remove('hidden');
+                fetchRequests();
+                resetPinPad();
+            }, 300);
+        } else {
+            // Error: Flash Red and Reset
+            pinDots.forEach(dot => dot.classList.add('error'));
+            setTimeout(() => {
+                resetPinPad();
+            }, 600);
+        }
     }
 
     // --- REAL IMAGE UPLOAD & ENCRYPTION ENGINE ---
@@ -138,7 +171,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             submitBtn.disabled = true;
 
             try {
-                // 1. Upload the physical image to Supabase Storage
                 const fileExt = imageFile.name.split('.').pop();
                 const fileName = `premium_${Date.now()}_${Math.random().toString(36).substring(7)}.${fileExt}`;
                 
@@ -148,14 +180,12 @@ document.addEventListener('DOMContentLoaded', async () => {
 
                 if (uploadError) throw uploadError;
 
-                // 2. Retrieve the public URL for the newly uploaded image
                 const { data: publicUrlData } = supabase.storage
                     .from('product-images')
                     .getPublicUrl(fileName);
 
                 const finalImageUrl = publicUrlData.publicUrl;
 
-                // 3. Insert all data into the Supabase PostgreSQL Database
                 submitBtn.innerText = "Encrypting Data...";
                 
                 const productData = {
@@ -174,7 +204,6 @@ document.addEventListener('DOMContentLoaded', async () => {
 
                 if (dbError) throw dbError;
 
-                // 4. Generate the secure unique link for the buyer
                 const newId = data[0].id;
                 const currentUrl = window.location.origin + window.location.pathname;
                 const finalLink = `${currentUrl}?id=${newId}`;
@@ -195,7 +224,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     }
 
-    // --- DASHBOARD: REAL-TIME APPROVAL LOGIC ---
+    // --- DASHBOARD: DYNAMIC STATS & APPROVAL LOGIC ---
     async function fetchRequests() {
         const { data, error } = await supabase
             .from('products')
@@ -209,8 +238,16 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         if (data.length === 0) {
             adminList.innerHTML = `<p>No secure records found in the database.</p>`;
+            statTotal.innerText = "0";
+            statPending.innerText = "0";
+            statVerified.innerText = "0";
             return;
         }
+
+        // Calculate Dashboard Analytics
+        statTotal.innerText = data.length;
+        statPending.innerText = data.filter(item => !item.is_paid).length;
+        statVerified.innerText = data.filter(item => item.is_paid).length;
 
         let html = '<table class="admin-table">';
         html += '<tr><th>Product Name</th><th>Price</th><th>Status</th><th>Action</th></tr>';
@@ -224,32 +261,31 @@ document.addEventListener('DOMContentLoaded', async () => {
                 '<span style="color: #555;">Locked (Waiting for User)</span>' : 
                 `<button onclick="approvePayment('${item.id}')" class="neon-btn" style="padding: 8px 12px; margin: 0; font-size: 12px; border-color: var(--neon-green); color: var(--neon-green); box-shadow: none;">Approve</button>`;
 
-            html += `<tr><td>${item.name}</td><td>${item.amount}</td><td>${statusText}</td><td>${actionBtn}</td></tr>`;
+            html += `<tr><td>${item.name}</td><td>TZS ${item.amount}</td><td>${statusText}</td><td>${actionBtn}</td></tr>`;
         });
         html += '</table>';
         adminList.innerHTML = html;
     }
 
-    // Expose approvePayment globally for the inline HTML onclick
+    // Global Authorization function
     window.approvePayment = async (id) => {
         const { error } = await supabase.from('products').update({ is_paid: true }).eq('id', id);
         if (error) {
             alert(`Database Error: ${error.message}`);
         } else {
-            fetchRequests(); // Refresh the table
+            fetchRequests(); // Refresh the table and stats dynamically
         }
     };
 
-    // --- BUYER VIEW LOGIC ---
+    // --- BUYER VIEW LOGIC (SWAHILI + DYNAMIC BACKGROUND) ---
     async function loadBuyerData(id) {
         const { data, error } = await supabase.from('products').select('*').eq('id', id).single();
 
         if (error || !data) {
-            document.getElementById('display-name').innerText = "Product Not Found or Encrypted.";
+            document.getElementById('display-name').innerText = "Bidhaa Haipatikani.";
             return;
         }
 
-        // Apply the premium dynamic background image
         if (bgLayer) {
             bgLayer.style.backgroundImage = `url('${data.image_url}')`;
         }
@@ -264,27 +300,24 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (data.is_paid) unlockProduct(data.secret_link);
     }
 
-    // --- THE SINGLE-USE TOKEN (BURN-AFTER-READING) LOGIC ---
+    // --- SINGLE-USE TOKEN (AUTO-LOCK) LOGIC ---
     const verifyBtn = document.getElementById('verify-payment-btn');
     if (verifyBtn) {
         verifyBtn.addEventListener('click', async () => {
-            verifyBtn.innerText = "Querying Database...";
+            verifyBtn.innerText = "Inahakiki Database...";
             verifyBtn.disabled = true;
             
-            // 1. Check if Admin has approved this specific link
             const { data } = await supabase.from('products').select('is_paid, secret_link').eq('id', productId).single();
 
             if (data && data.is_paid) {
-                // 2. Unlock the product for the buyer
                 unlockProduct(data.secret_link);
 
-                // 3. PREMIUM SECURITY: Instantly Auto-Lock the database entry
-                // This changes is_paid back to false so the link cannot be reused or shared!
+                // Premium Security: Instantly lock the database entry after delivery
                 await supabase.from('products').update({ is_paid: false }).eq('id', productId);
 
             } else {
-                alert("Transaction pending. The Admin has not verified this payment yet. Please ensure you have sent the funds and try again.");
-                verifyBtn.innerText = "Check Verification Again";
+                alert("Muamala bado unasubiri. Admin bado hajahakiki malipo haya. Tafadhali hakikisha umetuma pesa kisha jaribu tena baada ya muda mfupi.");
+                verifyBtn.innerText = "Bonyeza hapa kama umeshalipia";
                 verifyBtn.disabled = false;
             }
         });
