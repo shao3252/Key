@@ -1,5 +1,5 @@
 document.addEventListener('DOMContentLoaded', async () => {
-    // 1. Initialize Supabase Connection
+    // 1. Initialize Premium Supabase Connection
     const supabaseUrl = 'https://mduvgxdbefqbahlfphfw.supabase.co';
     const supabaseKey = 'sb_publishable_uwIP8jILU7OvcVo7D2MN4A_OZiIhH2s';
     const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
@@ -10,8 +10,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     const buyerPanel = document.getElementById('buyer-panel');
     const loginPanel = document.getElementById('login-panel');
     const dashboardPanel = document.getElementById('dashboard-panel');
-    const bgLayer = document.getElementById('bg-layer');
+    const bgLayer = document.getElementById('bg-layer'); // Dynamic Background
     
+    // Navigation & Action Buttons
     const dashboardIcon = document.getElementById('go-to-dashboard-icon');
     const backToUploadBtn = document.getElementById('back-to-upload-btn');
     const backToUploadFromLogin = document.getElementById('back-to-upload-from-login');
@@ -20,7 +21,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     
     let secretClicks = 0;
 
-    // --- INITIAL ROUTING LOGIC ---
+    // --- CORE ROUTING ENGINE ---
     const urlParams = new URLSearchParams(window.location.search);
     const productId = urlParams.get('id');
 
@@ -32,6 +33,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         dashboardPanel.classList.add('hidden');
     }
 
+    // Determine initial view based on URL parameters
     if (productId) {
         hideAllPanels();
         buyerPanel.classList.remove('hidden');
@@ -48,15 +50,16 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (secretClicks === 7) {
                 hideAllPanels();
                 adminPanel.classList.remove('hidden');
-                secretClicks = 0; 
+                secretClicks = 0; // Reset counter
             }
         });
     }
 
-    // --- ADMIN NAVIGATION ---
+    // --- ADMIN SYSTEM NAVIGATION ---
     if (dashboardIcon) {
         dashboardIcon.addEventListener('click', async () => {
             hideAllPanels();
+            // Verify if a secure session already exists
             const { data: { session } } = await supabase.auth.getSession();
             if (session) {
                 dashboardPanel.classList.remove('hidden');
@@ -81,7 +84,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     }
 
-    // --- ADMIN LOGIN & LOGOUT ---
+    // --- MASTER AUTHENTICATION (LOGIN/LOGOUT) ---
     const loginForm = document.getElementById('admin-login-form');
     if (loginForm) {
         loginForm.addEventListener('submit', async (e) => {
@@ -96,7 +99,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             const { error } = await supabase.auth.signInWithPassword({ email, password });
 
             if (error) {
-                alert(`Login Failed: ${error.message}`);
+                alert(`Authentication Failed: ${error.message}`);
                 loginBtn.innerText = "Authenticate";
                 loginBtn.disabled = false;
             } else {
@@ -118,7 +121,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     }
 
-    // --- UPLOAD PRODUCT LOGIC WITH REAL IMAGE TO SUPABASE STORAGE ---
+    // --- REAL IMAGE UPLOAD & ENCRYPTION ENGINE ---
     const uploadForm = document.getElementById('upload-form');
     if (uploadForm) {
         uploadForm.addEventListener('submit', async (e) => {
@@ -127,7 +130,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             const imageFile = document.getElementById('product-image').files[0];
             
             if (!imageFile) {
-                alert("Please select an image from your gallery.");
+                alert("Please select a product image from your gallery.");
                 return;
             }
 
@@ -135,8 +138,9 @@ document.addEventListener('DOMContentLoaded', async () => {
             submitBtn.disabled = true;
 
             try {
+                // 1. Upload the physical image to Supabase Storage
                 const fileExt = imageFile.name.split('.').pop();
-                const fileName = `${Date.now()}_${Math.random().toString(36).substring(7)}.${fileExt}`;
+                const fileName = `premium_${Date.now()}_${Math.random().toString(36).substring(7)}.${fileExt}`;
                 
                 const { error: uploadError } = await supabase.storage
                     .from('product-images')
@@ -144,12 +148,14 @@ document.addEventListener('DOMContentLoaded', async () => {
 
                 if (uploadError) throw uploadError;
 
+                // 2. Retrieve the public URL for the newly uploaded image
                 const { data: publicUrlData } = supabase.storage
                     .from('product-images')
                     .getPublicUrl(fileName);
 
                 const finalImageUrl = publicUrlData.publicUrl;
 
+                // 3. Insert all data into the Supabase PostgreSQL Database
                 submitBtn.innerText = "Encrypting Data...";
                 
                 const productData = {
@@ -168,6 +174,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
                 if (dbError) throw dbError;
 
+                // 4. Generate the secure unique link for the buyer
                 const newId = data[0].id;
                 const currentUrl = window.location.origin + window.location.pathname;
                 const finalLink = `${currentUrl}?id=${newId}`;
@@ -188,7 +195,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     }
 
-    // --- DASHBOARD: FETCH & APPROVE LOGIC ---
+    // --- DASHBOARD: REAL-TIME APPROVAL LOGIC ---
     async function fetchRequests() {
         const { data, error } = await supabase
             .from('products')
@@ -201,7 +208,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
 
         if (data.length === 0) {
-            adminList.innerHTML = `<p>No records found in the database.</p>`;
+            adminList.innerHTML = `<p>No secure records found in the database.</p>`;
             return;
         }
 
@@ -214,7 +221,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 '<span style="color: var(--neon-magenta); font-weight: bold;">PENDING</span>';
             
             const actionBtn = item.is_paid ? 
-                '<span style="color: #555;">Locked</span>' : 
+                '<span style="color: #555;">Locked (Waiting for User)</span>' : 
                 `<button onclick="approvePayment('${item.id}')" class="neon-btn" style="padding: 8px 12px; margin: 0; font-size: 12px; border-color: var(--neon-green); color: var(--neon-green); box-shadow: none;">Approve</button>`;
 
             html += `<tr><td>${item.name}</td><td>${item.amount}</td><td>${statusText}</td><td>${actionBtn}</td></tr>`;
@@ -223,26 +230,29 @@ document.addEventListener('DOMContentLoaded', async () => {
         adminList.innerHTML = html;
     }
 
+    // Expose approvePayment globally for the inline HTML onclick
     window.approvePayment = async (id) => {
         const { error } = await supabase.from('products').update({ is_paid: true }).eq('id', id);
         if (error) {
             alert(`Database Error: ${error.message}`);
         } else {
-            fetchRequests(); 
+            fetchRequests(); // Refresh the table
         }
     };
 
-    // --- BUYER VIEW LOGIC (SWAHILI TRANSLATED & BACKGROUND INJECTED) ---
+    // --- BUYER VIEW LOGIC ---
     async function loadBuyerData(id) {
         const { data, error } = await supabase.from('products').select('*').eq('id', id).single();
 
         if (error || !data) {
-            document.getElementById('display-name').innerText = "Bidhaa Haipatikani.";
+            document.getElementById('display-name').innerText = "Product Not Found or Encrypted.";
             return;
         }
 
-        // Set the Full Screen Background Image
-        bgLayer.style.backgroundImage = `url('${data.image_url}')`;
+        // Apply the premium dynamic background image
+        if (bgLayer) {
+            bgLayer.style.backgroundImage = `url('${data.image_url}')`;
+        }
 
         document.getElementById('display-name').innerText = data.name;
         document.getElementById('display-desc').innerText = data.description;
@@ -254,19 +264,27 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (data.is_paid) unlockProduct(data.secret_link);
     }
 
+    // --- THE SINGLE-USE TOKEN (BURN-AFTER-READING) LOGIC ---
     const verifyBtn = document.getElementById('verify-payment-btn');
     if (verifyBtn) {
         verifyBtn.addEventListener('click', async () => {
-            verifyBtn.innerText = "Inahakiki Database...";
+            verifyBtn.innerText = "Querying Database...";
             verifyBtn.disabled = true;
             
+            // 1. Check if Admin has approved this specific link
             const { data } = await supabase.from('products').select('is_paid, secret_link').eq('id', productId).single();
 
             if (data && data.is_paid) {
+                // 2. Unlock the product for the buyer
                 unlockProduct(data.secret_link);
+
+                // 3. PREMIUM SECURITY: Instantly Auto-Lock the database entry
+                // This changes is_paid back to false so the link cannot be reused or shared!
+                await supabase.from('products').update({ is_paid: false }).eq('id', productId);
+
             } else {
-                alert("Muamala bado unasubiri. Admin bado hajahakiki malipo haya. Tafadhali hakikisha umetuma pesa kisha jaribu tena baada ya muda mfupi.");
-                verifyBtn.innerText = "Bonyeza hapa kama umeshalipia";
+                alert("Transaction pending. The Admin has not verified this payment yet. Please ensure you have sent the funds and try again.");
+                verifyBtn.innerText = "Check Verification Again";
                 verifyBtn.disabled = false;
             }
         });
